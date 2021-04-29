@@ -1,0 +1,33 @@
+Addition to the decoration hints patch by Jakub Leszczak to not respect certain applications.
+Link to patch: https://dwm.suckless.org/patches/decoration_hints/
+
+diff --git a/config.h b/config.h
+index 9e3bbec..ef71333 100644
+--- a/config.h
++++ b/config.h
+@@ -43,6 +43,7 @@ static const float mfact     = 0.55; /* factor of master area size [0.05..0.95]
+ static const int nmaster     = 1;    /* number of clients in master area */
+ static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
+ static const int decorhints  = 1;    /* 1 means respect decoration hints */
++static const char *decor_ignore_list[] = {"firefox", "Navigator"};
+ 
+ static const Layout layouts[] = {
+ 	/* symbol     arrange function */
+diff --git a/dwm.c b/dwm.c
+index 4d5d36b..912a59f 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -2345,6 +2346,15 @@ updatemotifhints(Client *c)
+ 	unsigned long *motif;
+ 	int width, height;
+ 
++    XClassHint class_hint;
++    XGetClassHint(dpy, c->win, &class_hint);
++    for(int i = 0; i < sizeof(decor_ignore_list)/sizeof(char*);i++) {
++        if(strcmp(class_hint.res_class, decor_ignore_list[i]) != 0){
++            return;
++        }
++    }
++
+ 	if (!decorhints)
+ 		return;
